@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi File Component</title>
+</head>
+<body>
+
+<h1>Multi File Component</h1>
+
+<label for="fileInput">Choose multiple files:</label>
+<input type="file" id="fileInput" multiple>
+<button onclick="fetchAndDisplay()">Fetch & Display</button>
+
+<div id="fileContents"></div>
+
+<script>
+async function fetchAndDisplay() {
+  const fileInput = document.getElementById('fileInput');
+  const files = fileInput.files;
+
+  try {
+    const fileContents = await Promise.all(
+      Array.from(files).map(async (file) => {
+        const content = await readFileContent(file);
+        return { fileName: file.name, content };
+      })
+    );
+
+    const fileContentsDiv = document.getElementById('fileContents');
+    fileContentsDiv.innerHTML = '<h2>File Contents:</h2><ul>' +
+      fileContents.map(file => `<li><strong>${file.fileName}</strong><pre>${file.content}</pre></li>`).join('') +
+      '</ul>';
+  } catch (error) {
+    console.error('Error fetching or displaying file contents:', error);
+  }
+}
+
+function readFileContent(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+}
+</script>
+
+</body>
+</html>
